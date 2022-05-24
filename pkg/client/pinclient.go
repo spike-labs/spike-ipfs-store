@@ -20,7 +20,8 @@ func New(ctx context.Context, opts ...ClientOption) (*Client, error) {
 }
 
 func (c *Client) PinFileToIPFS(ctx context.Context) error {
-	_, _ = newTISClient(c.ctx, c.pinningService)
+	tisclient, _ := newTISClient(c.ctx, c.pinningService)
+	tisclient.PinFileToIPFS()
 	return nil
 }
 
