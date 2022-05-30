@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"io"
 	"net/http"
 )
@@ -46,7 +47,7 @@ func (p *PinataClient) PinJobs() error {
 }
 
 // PinFileToIPFS Send JSON to Pinata for direct pinning to IPFS.
-func (p *PinataClient) PinFileToIPFS() error {
+func (p *PinataClient) PinFileToIPFS(ctx context.Context, request *PinataRequest) error {
 	return nil
 }
 

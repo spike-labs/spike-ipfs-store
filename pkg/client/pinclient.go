@@ -20,10 +20,25 @@ func New(request ClientCreateRequest) (*Client, error) {
 	return &Client{pinningConnInfo: request}, nil
 }
 
-func (c *Client) PinFileToIPFS(ctx context.Context) error {
+func (c *Client) PinFileToIPFS(ctx context.Context, filePath string, opts ...PinataOptions) error {
 	tisclient, _ := newTISClient(c.ctx, c.pinningConnInfo)
-	tisclient.PinFileToIPFS()
-	return nil
+
+	options, err := processPinataOptions(opts...)
+	if err != nil {
+		return err
+	}
+
+	request := &api.PinataRequest{
+		PinataOptions: api.PinataOptions{
+			CidVersion:        options.CidVersion,
+			WrapWithDirectory: options.WrapWithDirectory,
+			CustomPinPolicy:   options.CustomPinPolicy,
+		},
+		PinataMetaData: options.PinataMetaData,
+	}
+
+	err = tisclient.PinFileToIPFS(ctx, request)
+	return err
 }
 
 func newTISClient(ctx context.Context, pinningService ClientCreateRequest) (api.IPFSPin, error) {
@@ -39,4 +54,15 @@ func newTISClient(ctx context.Context, pinningService ClientCreateRequest) (api.
 		logger.Fatalf("only pinata supported for file upload")
 	}
 	return tisClient, nil
+}
+
+func processPinataOptions(opts ...PinataOptions) (*PinataOption, error) {
+	options := PinataOption{}
+	for _, param := range opts {
+		err := param(&options)
+		if err != nil {
+			return nil, errors.WithMessage(err, "failed to create CA Client")
+		}
+	}
+	return &options, nil
 }

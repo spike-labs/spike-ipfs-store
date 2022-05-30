@@ -1,9 +1,11 @@
 package api
 
+import "context"
+
 type IPFSPin interface {
 	// Pinning
-	PinFileToIPFS() error // Send JSON to Pinata for direct pinning to IPFS.
-	Unpin() error         // Have Pinata unpin content that you've pinned through the service.
+	PinFileToIPFS(ctx context.Context, request *PinataRequest) error // Send JSON to Pinata for direct pinning to IPFS.
+	Unpin() error                                                    // Have Pinata unpin content that you've pinned through the service.
 
 	// Data
 	TestAuthentication() error // Tests that you can authenticate with Pinata correctly
