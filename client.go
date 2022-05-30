@@ -2,7 +2,8 @@ package pinata
 
 const (
 	DefaultNode = "https://api.pinata.cloud"
-	ApiPinFile  = "/pinning/pinFileToIPFS"
+	//DefaultNode = "https://oasis.mypinata.cloud"
+	ApiPinFile = "/pinning/pinFileToIPFS"
 )
 
 type Client struct {

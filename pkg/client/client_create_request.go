@@ -10,6 +10,8 @@ type ClientCreateRequest struct {
 	pinningServiceBaseUrl string
 	filePinBaseUrl        string
 	bearerToken           string
+	pinataApiKey          string
+	pinataSecretApiKey    string
 	httpClient            *http.Client
 }
 
@@ -35,6 +37,7 @@ func (r ClientCreateRequest) FilePinBaseUrl(url string) ClientCreateRequest {
 	return r
 }
 
+// todo 初始化成有一定配置的client，而不依赖用户的传入
 func (r ClientCreateRequest) HttpClient(client http.Client) ClientCreateRequest {
 	r.httpClient = &client
 	return r

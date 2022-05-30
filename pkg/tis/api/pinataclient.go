@@ -1,10 +1,28 @@
 package api
 
+import (
+	"io"
+	"net/http"
+)
+
 type PinataClient struct {
+	pinataApiKey       string
+	pinataSecretApiKey string
 }
 
+// todo 把构建req的信息传入，从而构建client
 func NewPinataClient() (*PinataClient, error) {
 	return nil, nil
+}
+
+func (p *PinataClient) NewRequestWithHeaders(method, url string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, body)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("pinata_api_key", p.pinataApiKey)
+	req.Header.Set("pinata_secret_api_key", p.pinataSecretApiKey)
+	return req, nil
 }
 
 // HashMetaData  Modify stored file metadata.
