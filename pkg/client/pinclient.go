@@ -5,48 +5,64 @@ import (
 	logging "github.com/ipfs/go-log/v2"
 	"github.com/jooyyy/pinata-go/pkg/tis"
 	"github.com/jooyyy/pinata-go/pkg/tis/api"
+	"github.com/jooyyy/pinata-go/pkg/tis/pinataclient"
 	"github.com/pkg/errors"
+	"net/http"
 )
 
 var logger = logging.Logger("ipfs-store")
 
 type Client struct {
-	pinningConnInfo ClientCreateRequest
-	ctx             context.Context
+	httpClient *http.Client
+	tisClient  api.IPFSPin
+	ctx        context.Context
 }
 
 func New(request ClientCreateRequest) (*Client, error) {
+	tisclient, _ := newTISClient(request)
 
-	return &Client{pinningConnInfo: request}, nil
+	return &Client{httpClient: request.GetHttpClient(), tisClient: tisclient}, nil
 }
 
-func (c *Client) PinFileToIPFS(ctx context.Context, filePath string, opts ...PinataOptions) error {
-	tisclient, _ := newTISClient(c.ctx, c.pinningConnInfo)
+func (c *Client) PinFileToIPFS(ctx context.Context, filePath string, opts ...PinataOptions) (*http.Response, error) {
 
 	options, err := processPinataOptions(opts...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	request := &api.PinataRequest{
 		PinataOptions: api.PinataOptions{
 			CidVersion:        options.CidVersion,
 			WrapWithDirectory: options.WrapWithDirectory,
-			CustomPinPolicy:   options.CustomPinPolicy,
+			CustomPinPolicy: api.CustomPinPolicy{
+				Regions: options.CustomPinPolicy.Regions,
+			},
 		},
 		PinataMetaData: options.PinataMetaData,
 	}
-
-	err = tisclient.PinFileToIPFS(ctx, request)
-	return err
+	// todo The bottom method packaging req returns to the upper layer for processing.
+	req, err := c.tisClient.PinFileToIPFS(ctx, request)
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
-func newTISClient(ctx context.Context, pinningService ClientCreateRequest) (api.IPFSPin, error) {
+func newTISClient(pinningService ClientCreateRequest) (api.IPFSPin, error) {
 	var err error
 	var tisClient api.IPFSPin
 	switch pinningService.ps.String() {
 	case tis.Pinata.String():
-		tisClient, err = api.NewPinataClient()
+		request := &pinataclient.PinataClientRequest{
+			BearerToken:           pinningService.GetBearerToken(),
+			PinningServiceBaseUrl: pinningService.GetPinningServiceBaseUrl(),
+			FilePinBaseUrl:        pinningService.GetFilePinBaseUrl(),
+			PinataApiKey:          pinningService.GetPinataApiKey(),
+			PinataSecretApiKey:    pinningService.GetPinataSecretApiKey(),
+		}
+		tisClient, err = api.NewPinataClient(request)
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to create Pinata Client")
 		}

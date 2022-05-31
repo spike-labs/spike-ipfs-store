@@ -1,6 +1,10 @@
 package pinata
 
 import (
+	"context"
+	"fmt"
+	"github.com/jooyyy/pinata-go/pkg/client"
+	"github.com/jooyyy/pinata-go/pkg/tis"
 	"github.com/magiconair/properties/assert"
 	"testing"
 )
@@ -14,4 +18,15 @@ func TestClient_PinFile(t *testing.T) {
 	)
 	_, err := client.PinFile("upload/img.png")
 	assert.Equal(t, err, nil)
+}
+
+func TestNewClient_PinFile(t *testing.T) {
+	req := client.NewClientRequest(tis.Pinata).PinataApiKey("6d2a1a3f3775a79ab198").PinataSecretApiKey("5224d1e3a6388fe9ca32f3b7b49e3877ac02a01049a1f0b0c62944fe7aa0f542")
+	clients, err := client.New(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	ctx := context.TODO()
+	res, err := clients.PinFileToIPFS(ctx, "upload/img.png")
+	fmt.Println(res)
 }

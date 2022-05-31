@@ -19,6 +19,7 @@ func NewClientRequest(ps tis.PinningService) ClientCreateRequest {
 	request := ClientCreateRequest{ps: ps}
 	request.pinningServiceBaseUrl = ps.GetPinningServiceBaseUrl()
 	request.filePinBaseUrl = ps.GetFilePinBaseUrl()
+	request.httpClient = ps.CreateHTTPClient()
 	return request
 }
 
@@ -37,8 +38,42 @@ func (r ClientCreateRequest) FilePinBaseUrl(url string) ClientCreateRequest {
 	return r
 }
 
-// todo 初始化成有一定配置的client，而不依赖用户的传入
+func (r ClientCreateRequest) PinataApiKey(key string) ClientCreateRequest {
+	r.pinataApiKey = key
+	return r
+}
+
+func (r ClientCreateRequest) PinataSecretApiKey(secretKey string) ClientCreateRequest {
+	r.pinataSecretApiKey = secretKey
+	return r
+}
+
+// HttpClient Users can initialize http.pinataclient replacement for automatic initialization
 func (r ClientCreateRequest) HttpClient(client http.Client) ClientCreateRequest {
 	r.httpClient = &client
 	return r
+}
+
+func (r ClientCreateRequest) GetPinningServiceBaseUrl() string {
+	return r.pinningServiceBaseUrl
+}
+
+func (r ClientCreateRequest) GetFilePinBaseUrl() string {
+	return r.filePinBaseUrl
+}
+
+func (r ClientCreateRequest) GetPinataApiKey() string {
+	return r.pinataApiKey
+}
+
+func (r ClientCreateRequest) GetPinataSecretApiKey() string {
+	return r.pinataSecretApiKey
+}
+
+func (r ClientCreateRequest) GetBearerToken() string {
+	return r.bearerToken
+}
+
+func (r ClientCreateRequest) GetHttpClient() *http.Client {
+	return r.httpClient
 }

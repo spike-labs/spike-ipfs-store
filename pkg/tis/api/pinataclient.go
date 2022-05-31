@@ -1,19 +1,32 @@
 package api
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"github.com/jooyyy/pinata-go/pkg/tis/pinataclient"
 	"io"
 	"net/http"
 )
 
 type PinataClient struct {
-	pinataApiKey       string
-	pinataSecretApiKey string
+	bearerToken           string
+	pinningServiceBaseUrl string
+	filePinBaseUrl        string
+	pinataApiKey          string
+	pinataSecretApiKey    string
 }
 
-// todo 把构建req的信息传入，从而构建client
-func NewPinataClient() (*PinataClient, error) {
-	return nil, nil
+// todo Pass in the information of building req to build the pinataclient.
+func NewPinataClient(pinataClientInfo *pinataclient.PinataClientRequest) (*PinataClient, error) {
+	pinataClient := &PinataClient{
+		bearerToken:           pinataClientInfo.BearerToken,
+		pinningServiceBaseUrl: pinataClientInfo.PinningServiceBaseUrl,
+		filePinBaseUrl:        pinataClientInfo.FilePinBaseUrl,
+		pinataApiKey:          pinataClientInfo.PinataApiKey,
+		pinataSecretApiKey:    pinataClientInfo.PinataSecretApiKey,
+	}
+	return pinataClient, nil
 }
 
 func (p *PinataClient) NewRequestWithHeaders(method, url string, body io.Reader) (*http.Request, error) {
@@ -47,8 +60,21 @@ func (p *PinataClient) PinJobs() error {
 }
 
 // PinFileToIPFS Send JSON to Pinata for direct pinning to IPFS.
-func (p *PinataClient) PinFileToIPFS(ctx context.Context, request *PinataRequest) error {
-	return nil
+func (p *PinataClient) PinFileToIPFS(ctx context.Context, request *PinataRequest) (*http.Request, error) {
+	po, err := json.Marshal(request.PinataOptions)
+	if err != nil {
+		return nil, err
+	}
+	pm, err := json.Marshal(request.PinataMetaData)
+	if err != nil {
+		return nil, err
+	}
+	b := append(po, pm...)
+	req, err := p.NewRequestWithHeaders("POST", p.pinningServiceBaseUrl+"/pinning/pinHashToIPFS", bytes.NewReader(b))
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
 }
 
 //PinJSONToIPFS Send JSON to Pinata for direct pinning to IPFS.
@@ -62,8 +88,12 @@ func (p *PinataClient) Unpin() error {
 }
 
 //TestAuthentication Tests that you can authenticate with Pinata correctly
-func (p *PinataClient) TestAuthentication() error {
-	return nil
+func (p *PinataClient) TestAuthentication() (*http.Request, error) {
+	req, err := p.NewRequestWithHeaders("GET", p.pinningServiceBaseUrl+"/data/testAuthentication", nil)
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
 }
 
 //PinList  Retrieve pin records for your Pinata account

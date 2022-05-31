@@ -1,6 +1,6 @@
 package client
 
-// client options collector
+// pinataclient options collector
 type PinataOption struct {
 	CidVersion        int
 	WrapWithDirectory bool
@@ -9,12 +9,12 @@ type PinataOption struct {
 }
 
 type CustomPinPolicy struct {
-	Regions []Regions
+	Regions []Regions `json:"regions"`
 }
 
 type Regions struct {
-	ID                      string
-	DesiredReplicationCount int
+	ID                      string `json:"id"`
+	DesiredReplicationCount int    `json:"desiredReplicationCount"`
 }
 
 type PinataMetaData struct {
