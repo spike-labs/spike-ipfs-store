@@ -3,6 +3,7 @@ package api
 type PinataRequest struct {
 	PinataOptions  *PinataOptions  `json:"pinataOptions"`
 	PinataMetaData *PinataMetaData `json:"pinataMetadata"`
+	PinataContent  string          `json:"pinataContent"`
 }
 
 type PinataOptions struct {

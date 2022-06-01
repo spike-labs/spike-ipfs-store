@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"github.com/Fueav/spike-ipfs-store/pkg/tis"
 	"github.com/Fueav/spike-ipfs-store/pkg/tis/api"
 	"github.com/Fueav/spike-ipfs-store/pkg/tis/pinataclient"
@@ -40,8 +41,36 @@ func (c *Client) PinFileToIPFS(ctx context.Context, filePath string, opts ...Pin
 		},
 		PinataMetaData: options.PinataMetaData,
 	}
-	// todo The bottom method packaging req returns to the upper layer for processing.
+
 	req, err := c.tisClient.PinFileToIPFS(ctx, request, filePath)
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (c *Client) PinJSONToIPFS(ctx context.Context, json string, opts ...PinataOptions) (*http.Response, error) {
+
+	options, err := processPinataOptions(opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	request := &api.PinataRequest{
+		PinataOptions: &api.PinataOptions{
+			CidVersion:        options.CidVersion,
+			WrapWithDirectory: options.WrapWithDirectory,
+			CustomPinPolicy:   options.CustomPinPolicy,
+		},
+		PinataMetaData: options.PinataMetaData,
+		PinataContent:  json,
+	}
+
+	req, err := c.tisClient.PinJSONToIPFS(ctx, request, json)
+	fmt.Println("-------------------")
+	fmt.Printf("%+v", req)
+	fmt.Println("\n-------------------")
 	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err

@@ -22,7 +22,6 @@ type PinataClient struct {
 	pinataSecretApiKey    string
 }
 
-// todo Pass in the information of building req to build the pinataclient.
 func NewPinataClient(pinataClientInfo *pinataclient.PinataClientRequest) (*PinataClient, error) {
 	pinataClient := &PinataClient{
 		bearerToken:           pinataClientInfo.BearerToken,
@@ -66,6 +65,9 @@ func (p *PinataClient) PinJobs() error {
 
 // PinFileToIPFS Send JSON to Pinata for direct pinning to IPFS.
 func (p *PinataClient) PinFileToIPFS(ctx context.Context, request *PinataRequest, filePath string) (*http.Request, error) {
+	var b bytes.Buffer
+	var err error
+	w := multipart.NewWriter(&b)
 	localVarFormParams := url.Values{}
 
 	if request.PinataOptions != nil {
@@ -82,21 +84,23 @@ func (p *PinataClient) PinFileToIPFS(ctx context.Context, request *PinataRequest
 		}
 		localVarFormParams.Add("pinataMetadata", paramJson)
 	}
-	//po, err := json.Marshal(request.PinataOptions)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//pm, err := json.Marshal(request.PinataMetaData)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	//b := append(po, pm...)
-	reader, w, err := createMultipartFormData(filePath, localVarFormParams)
-	//bp := append(b, reader.Bytes()...)
 
-	req, err := p.NewRequestWithHeaders("POST", p.pinningServiceBaseUrl+"/pinning/pinFileToIPFS", &reader)
-	//req, err := p.NewRequestWithHeaders("POST", p.pinningServiceBaseUrl+"/pinning/pinFileToIPFS", bytes.NewReader(bp))
+	err = createMultipartFormData(localVarFormParams, w)
+	if err != nil {
+		return nil, err
+	}
+
+	err = createMultipartFormFile(filePath, w)
+	if err != nil {
+		return nil, err
+	}
+
+	err = w.Close()
+	if err != nil {
+		return nil, err
+	}
+	req, err := p.NewRequestWithHeaders("POST", p.pinningServiceBaseUrl+"/pinning/pinFileToIPFS", &b)
+
 	req.Header.Set("Content-Type", w.FormDataContentType())
 	fmt.Printf("%+v", localVarFormParams)
 	if err != nil {
@@ -105,36 +109,40 @@ func (p *PinataClient) PinFileToIPFS(ctx context.Context, request *PinataRequest
 	return req, nil
 }
 
-func createMultipartFormData(filePath string, formParams url.Values) (bytes.Buffer, *multipart.Writer, error) {
-	var b bytes.Buffer
+func createMultipartFormFile(filePath string, w *multipart.Writer) error {
 	var err error
-	w := multipart.NewWriter(&b)
 	var fw io.Writer
+
 	file, err := os.Open(filePath)
 	if err != nil {
-		return b, w, err
+		return err
 	}
 	if fw, err = w.CreateFormFile("file", formatFilename(filePath)); err != nil {
-		if len(formParams) != 0 {
-			for k, v := range formParams {
-				for _, iv := range v {
-					// form value
-					err := w.WriteField(k, iv)
-					if err != nil {
-						fmt.Println("add param error", err)
-					}
-				}
-			}
-		}
-
-		return b, w, err
+		return err
 	}
 
 	if _, err = io.Copy(fw, file); err != nil {
-		return b, w, err
+		return err
 	}
-	w.Close()
-	return b, w, nil
+	return nil
+}
+
+func createMultipartFormData(formParams url.Values, w *multipart.Writer) error {
+
+	if len(formParams) != 0 {
+		for k, v := range formParams {
+			for _, iv := range v {
+				// form value
+				err := w.WriteField(k, iv)
+				if err != nil {
+					fmt.Println("add param error", err)
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func formatFilename(path string) string {
@@ -155,8 +163,22 @@ func parameterToJson(obj interface{}) (string, error) {
 }
 
 //PinJSONToIPFS Send JSON to Pinata for direct pinning to IPFS.
-func (p *PinataClient) PinJSONToIPFS() error {
-	return nil
+func (p *PinataClient) PinJSONToIPFS(ctx context.Context, request *PinataRequest, jsonString string) (*http.Request, error) {
+
+	paramJson, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("-------------------")
+	fmt.Printf("%+v", string(paramJson))
+	fmt.Println("\n-------------------")
+
+	req, err := p.NewRequestWithHeaders("POST", p.pinningServiceBaseUrl+"/pinning/pinJSONToIPFS", bytes.NewBuffer(paramJson))
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	if err != nil {
+		return nil, err
+	}
+	return req, nil
 }
 
 //Unpin   Have Pinata unpin content that you've pinned through the service.

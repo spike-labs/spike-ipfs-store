@@ -3,9 +3,9 @@ package pinata
 import (
 	"context"
 	"fmt"
-	"github.com/jooyyy/pinata-go/pkg/client"
-	"github.com/jooyyy/pinata-go/pkg/tis"
-	"github.com/jooyyy/pinata-go/pkg/tis/api"
+	"github.com/Fueav/spike-ipfs-store/pkg/client"
+	"github.com/Fueav/spike-ipfs-store/pkg/tis"
+	"github.com/Fueav/spike-ipfs-store/pkg/tis/api"
 	"github.com/magiconair/properties/assert"
 	"io/ioutil"
 	"testing"
@@ -35,6 +35,25 @@ func TestNewClient_PinFile(t *testing.T) {
 	regions := append(policy, api.Regions{ID: "FRA1", DesiredReplicationCount: 2})
 	resp, err := clients.PinFileToIPFS(ctx, "upload/img.png", client.WithPinataMetaData(&api.PinataMetaData{Name: "img.png", Keyvalues: testMap}), client.WithCustomPinPolicy(&api.CustomPinPolicy{Regions: regions}))
 
+	defer resp.Body.Close()
+	content, err := ioutil.ReadAll(resp.Body)
+	fmt.Println("debug joy", string(content))
+	//fmt.Println("response:", res)
+	assert.Equal(t, err, nil)
+}
+
+func TestNewClient_PinJSON(t *testing.T) {
+	req := client.NewClientRequest(tis.Pinata).PinataApiKey("6d2a1a3f3775a79ab198").PinataSecretApiKey("5224d1e3a6388fe9ca32f3b7b49e3877ac02a01049a1f0b0c62944fe7aa0f542")
+	clients, err := client.New(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	ctx := context.TODO()
+	testMap := make(map[string]string)
+	testMap["fuyiwei"] = "handsome"
+	policy := make([]api.Regions, 0)
+	regions := append(policy, api.Regions{ID: "FRA1", DesiredReplicationCount: 2})
+	resp, err := clients.PinJSONToIPFS(ctx, "{    \"error\": 0,    \"status\": \"success\",    \"date\": \"2021-12-31\"}", client.WithPinataMetaData(&api.PinataMetaData{Name: "this is a Valuable JSON String", Keyvalues: testMap}), client.WithCustomPinPolicy(&api.CustomPinPolicy{Regions: regions}))
 	defer resp.Body.Close()
 	content, err := ioutil.ReadAll(resp.Body)
 	fmt.Println("debug joy", string(content))
