@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/jooyyy/pinata-go/pkg/tis"
+	"github.com/Fueav/spike-ipfs-store/pkg/tis"
 	"net/http"
 )
 

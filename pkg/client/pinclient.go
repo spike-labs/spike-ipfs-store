@@ -2,10 +2,11 @@ package client
 
 import (
 	"context"
+	"github.com/Fueav/spike-ipfs-store/pkg/tis"
+	"github.com/Fueav/spike-ipfs-store/pkg/tis/api"
+	"github.com/Fueav/spike-ipfs-store/pkg/tis/pinataclient"
 	logging "github.com/ipfs/go-log/v2"
-	"github.com/jooyyy/pinata-go/pkg/tis"
-	"github.com/jooyyy/pinata-go/pkg/tis/api"
-	"github.com/jooyyy/pinata-go/pkg/tis/pinataclient"
+
 	"github.com/pkg/errors"
 	"net/http"
 )
@@ -32,17 +33,15 @@ func (c *Client) PinFileToIPFS(ctx context.Context, filePath string, opts ...Pin
 	}
 
 	request := &api.PinataRequest{
-		PinataOptions: api.PinataOptions{
+		PinataOptions: &api.PinataOptions{
 			CidVersion:        options.CidVersion,
 			WrapWithDirectory: options.WrapWithDirectory,
-			CustomPinPolicy: api.CustomPinPolicy{
-				Regions: options.CustomPinPolicy.Regions,
-			},
+			CustomPinPolicy:   options.CustomPinPolicy,
 		},
 		PinataMetaData: options.PinataMetaData,
 	}
 	// todo The bottom method packaging req returns to the upper layer for processing.
-	req, err := c.tisClient.PinFileToIPFS(ctx, request)
+	req, err := c.tisClient.PinFileToIPFS(ctx, request, filePath)
 	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err

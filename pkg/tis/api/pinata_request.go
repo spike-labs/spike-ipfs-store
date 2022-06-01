@@ -1,14 +1,14 @@
 package api
 
 type PinataRequest struct {
-	PinataOptions  PinataOptions  `json:"pinataOptions"`
-	PinataMetaData PinataMetaData `json:"pinataMetadata"`
+	PinataOptions  *PinataOptions  `json:"pinataOptions"`
+	PinataMetaData *PinataMetaData `json:"pinataMetadata"`
 }
 
 type PinataOptions struct {
-	CidVersion        int             `json:"cidVersion"`
-	WrapWithDirectory bool            `json:"wrapWithDirectory"`
-	CustomPinPolicy   CustomPinPolicy `json:"customPinPolicy"`
+	CidVersion        int              `json:"cidVersion"`
+	WrapWithDirectory bool             `json:"wrapWithDirectory"`
+	CustomPinPolicy   *CustomPinPolicy `json:"customPinPolicy"`
 }
 
 type PinataMetaData struct {

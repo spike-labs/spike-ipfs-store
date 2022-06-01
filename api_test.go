@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/jooyyy/pinata-go/pkg/client"
 	"github.com/jooyyy/pinata-go/pkg/tis"
+	"github.com/jooyyy/pinata-go/pkg/tis/api"
 	"github.com/magiconair/properties/assert"
+	"io/ioutil"
 	"testing"
 )
 
@@ -27,6 +29,15 @@ func TestNewClient_PinFile(t *testing.T) {
 		fmt.Println(err)
 	}
 	ctx := context.TODO()
-	res, err := clients.PinFileToIPFS(ctx, "upload/img.png")
-	fmt.Println(res)
+	testMap := make(map[string]string)
+	testMap["fuyiwei"] = "handsome"
+	policy := make([]api.Regions, 0)
+	regions := append(policy, api.Regions{ID: "FRA1", DesiredReplicationCount: 2})
+	resp, err := clients.PinFileToIPFS(ctx, "upload/img.png", client.WithPinataMetaData(&api.PinataMetaData{Name: "img.png", Keyvalues: testMap}), client.WithCustomPinPolicy(&api.CustomPinPolicy{Regions: regions}))
+
+	defer resp.Body.Close()
+	content, err := ioutil.ReadAll(resp.Body)
+	fmt.Println("debug joy", string(content))
+	//fmt.Println("response:", res)
+	assert.Equal(t, err, nil)
 }

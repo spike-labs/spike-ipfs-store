@@ -1,4 +1,4 @@
-module github.com/jooyyy/pinata-go
+module github.com/Fueav/spike-ipfs-store
 
 go 1.17
 
