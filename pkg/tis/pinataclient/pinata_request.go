@@ -1,4 +1,4 @@
-package api
+package pinataclient
 
 type PinataRequest struct {
 	PinataOptions  *PinataOptions  `json:"pinataOptions"`

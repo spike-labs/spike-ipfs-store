@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/Fueav/spike-ipfs-store/pkg/client"
 	"github.com/Fueav/spike-ipfs-store/pkg/tis"
-	"github.com/Fueav/spike-ipfs-store/pkg/tis/api"
+	"github.com/Fueav/spike-ipfs-store/pkg/tis/pinataclient"
 	"github.com/magiconair/properties/assert"
 	"io/ioutil"
 	"testing"
@@ -31,9 +31,9 @@ func TestNewClient_PinFile(t *testing.T) {
 	ctx := context.TODO()
 	testMap := make(map[string]string)
 	testMap["fuyiwei"] = "handsome"
-	policy := make([]api.Regions, 0)
-	regions := append(policy, api.Regions{ID: "FRA1", DesiredReplicationCount: 2})
-	resp, err := clients.PinFileToIPFS(ctx, "upload/img.png", client.WithPinataMetaData(&api.PinataMetaData{Name: "img.png", Keyvalues: testMap}), client.WithCustomPinPolicy(&api.CustomPinPolicy{Regions: regions}))
+	policy := make([]pinataclient.Regions, 0)
+	regions := append(policy, pinataclient.Regions{ID: "FRA1", DesiredReplicationCount: 2})
+	resp, err := clients.PinFileToIPFS(ctx, "upload/img.png", client.WithPinataMetaData(&pinataclient.PinataMetaData{Name: "img.png", Keyvalues: testMap}), client.WithCustomPinPolicy(&pinataclient.CustomPinPolicy{Regions: regions}))
 
 	defer resp.Body.Close()
 	content, err := ioutil.ReadAll(resp.Body)
@@ -51,9 +51,9 @@ func TestNewClient_PinJSON(t *testing.T) {
 	ctx := context.TODO()
 	testMap := make(map[string]string)
 	testMap["fuyiwei"] = "handsome"
-	policy := make([]api.Regions, 0)
-	regions := append(policy, api.Regions{ID: "FRA1", DesiredReplicationCount: 2})
-	resp, err := clients.PinJSONToIPFS(ctx, "{    \"error\": 0,    \"status\": \"success\",    \"date\": \"2021-12-31\"}", client.WithPinataMetaData(&api.PinataMetaData{Name: "this is a Valuable JSON String", Keyvalues: testMap}), client.WithCustomPinPolicy(&api.CustomPinPolicy{Regions: regions}))
+	policy := make([]pinataclient.Regions, 0)
+	regions := append(policy, pinataclient.Regions{ID: "FRA1", DesiredReplicationCount: 2})
+	resp, err := clients.PinJSONToIPFS(ctx, "{    \"error\": 0,    \"status\": \"success\",    \"date\": \"2021-12-31\"}", client.WithPinataMetaData(&pinataclient.PinataMetaData{Name: "this is a Valuable JSON String", Keyvalues: testMap}), client.WithCustomPinPolicy(&pinataclient.CustomPinPolicy{Regions: regions}))
 	defer resp.Body.Close()
 	content, err := ioutil.ReadAll(resp.Body)
 	fmt.Println("debug joy", string(content))

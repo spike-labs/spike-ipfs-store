@@ -1,13 +1,15 @@
 package client
 
-import "github.com/Fueav/spike-ipfs-store/pkg/tis/api"
+import (
+	"github.com/Fueav/spike-ipfs-store/pkg/tis/pinataclient"
+)
 
 // pinataclient options collector
 type PinataOption struct {
 	CidVersion        int
 	WrapWithDirectory bool
-	CustomPinPolicy   *api.CustomPinPolicy
-	PinataMetaData    *api.PinataMetaData
+	CustomPinPolicy   *pinataclient.CustomPinPolicy
+	PinataMetaData    *pinataclient.PinataMetaData
 }
 
 // PinataOption  describes a functional parameter for the New constructor
@@ -30,14 +32,14 @@ func WithWrapWithDirectory(wrapWithDirectory bool) PinataOptions {
 }
 
 // WithCustomPinPolicy  a custom pin policy for the piece of content being pinned.
-func WithCustomPinPolicy(customPinPolicy *api.CustomPinPolicy) PinataOptions {
+func WithCustomPinPolicy(customPinPolicy *pinataclient.CustomPinPolicy) PinataOptions {
 	return func(c *PinataOption) error {
 		c.CustomPinPolicy = customPinPolicy
 		return nil
 	}
 }
 
-func WithPinataMetaData(pinataMetaData *api.PinataMetaData) PinataOptions {
+func WithPinataMetaData(pinataMetaData *pinataclient.PinataMetaData) PinataOptions {
 	return func(c *PinataOption) error {
 		c.PinataMetaData = pinataMetaData
 		return nil

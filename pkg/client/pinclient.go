@@ -33,8 +33,8 @@ func (c *Client) PinFileToIPFS(ctx context.Context, filePath string, opts ...Pin
 		return nil, err
 	}
 
-	request := &api.PinataRequest{
-		PinataOptions: &api.PinataOptions{
+	request := &pinataclient.PinataRequest{
+		PinataOptions: &pinataclient.PinataOptions{
 			CidVersion:        options.CidVersion,
 			WrapWithDirectory: options.WrapWithDirectory,
 			CustomPinPolicy:   options.CustomPinPolicy,
@@ -57,8 +57,8 @@ func (c *Client) PinJSONToIPFS(ctx context.Context, json string, opts ...PinataO
 		return nil, err
 	}
 
-	request := &api.PinataRequest{
-		PinataOptions: &api.PinataOptions{
+	request := &pinataclient.PinataRequest{
+		PinataOptions: &pinataclient.PinataOptions{
 			CidVersion:        options.CidVersion,
 			WrapWithDirectory: options.WrapWithDirectory,
 			CustomPinPolicy:   options.CustomPinPolicy,
@@ -90,7 +90,7 @@ func newTISClient(pinningService ClientCreateRequest) (api.IPFSPin, error) {
 			PinataApiKey:          pinningService.GetPinataApiKey(),
 			PinataSecretApiKey:    pinningService.GetPinataSecretApiKey(),
 		}
-		tisClient, err = api.NewPinataClient(request)
+		tisClient, err = pinataclient.NewPinataClient(request)
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to create Pinata Client")
 		}

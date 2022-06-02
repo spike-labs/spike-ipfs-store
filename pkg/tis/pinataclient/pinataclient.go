@@ -1,11 +1,10 @@
-package api
+package pinataclient
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/Fueav/spike-ipfs-store/pkg/tis/pinataclient"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -22,7 +21,7 @@ type PinataClient struct {
 	pinataSecretApiKey    string
 }
 
-func NewPinataClient(pinataClientInfo *pinataclient.PinataClientRequest) (*PinataClient, error) {
+func NewPinataClient(pinataClientInfo *PinataClientRequest) (*PinataClient, error) {
 	pinataClient := &PinataClient{
 		bearerToken:           pinataClientInfo.BearerToken,
 		pinningServiceBaseUrl: pinataClientInfo.PinningServiceBaseUrl,
